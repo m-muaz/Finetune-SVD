@@ -1,6 +1,7 @@
 # Finetune-SVD
 Fine tune stable video diffusion.
 
+![tile](assets/tile.gif)
 
 # Memory usage
 I have used xformers and the minimum requirement is to successfully train on 80GB A100. If you have a better plan to reduce graphics memory usage, please let me know or PR. Thanks.
