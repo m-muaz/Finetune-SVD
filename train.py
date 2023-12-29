@@ -222,30 +222,6 @@ def _resize_with_antialiasing(input, size, interpolation="bicubic", align_corner
 def encode_image(image_processor, feature_extractor, image_encoder, image, device, num_videos_per_prompt, do_classifier_free_guidance):
     dtype = next(image_encoder.parameters()).dtype
 
-    # image = image.detach().cpu().numpy()
-    # image = image_processor.pt_to_numpy(image)
-
-    # if not isinstance(image, torch.Tensor):
-    #     image = image_processor.pil_to_numpy(image)
-    #     image = image_processor.numpy_to_pt(image)
-
-    #     # We normalize the image before resizing to match with the original implementation.
-    #     # Then we unnormalize it after resizing.
-    #     image = image * 2.0 - 1.0
-    #     image = _resize_with_antialiasing(image, (224, 224))
-    #     image = (image + 1.0) / 2.0
-
-    #     # Normalize the image with for CLIP input
-    #     image = feature_extractor(
-    #         images=image,
-    #         do_normalize=True,
-    #         do_center_crop=False,
-    #         do_resize=False,
-    #         do_rescale=False,
-    #         return_tensors="pt",
-    #     ).pixel_values
-
-
     # We normalize the image before resizing to match with the original implementation.
     # Then we unnormalize it after resizing.
     image = image * 2.0 - 1.0
@@ -690,7 +666,7 @@ def main(
     )
 
     tokenizer = CLIPTokenizer.from_pretrained("damo-vilab/text-to-video-ms-1.7b", subfolder="tokenizer")
-    train_dataset = VideoCSVDataset(csv_path='/mnt/dolphinfs/ssd_pool/docker/user/hadoop-mtcv/wangqiang121/animating/svd/Video-BLIP2-Preprocessor-main/train_data/validation_warping.csv',
+    train_dataset = VideoCSVDataset(csv_path='./validation_warping.csv',
                               tokenizer=tokenizer,
                               fps = 29,
                               n_sample_frames=25,
@@ -858,23 +834,6 @@ def main(
                     random_integer = random.randint(0, num_inference_steps)
                     timesteps = scheduler.timesteps
                     timesteps = timesteps[random_integer]
-                    
-
-                    # 5. Prepare latent variables
-                    # num_channels_latents = unet.config.in_channels
-                    # latents = prepare_latents(
-                    #     vae_scale_factor,
-                    #     scheduler,
-                    #     batch_size * num_videos_per_prompt,
-                    #     num_frames,
-                    #     num_channels_latents,
-                    #     height,
-                    #     width,
-                    #     image_embeddings.dtype,
-                    #     device,
-                    #     generator,
-                    #     latents,
-                    # )
 
                     # 7. Prepare guidance scale
                     guidance_scale = torch.linspace(min_guidance_scale, max_guidance_scale, num_frames).unsqueeze(0)
@@ -888,15 +847,6 @@ def main(
 
                     # Concatenate image_latents over channels dimention
                     latent_model_input = torch.cat([latent_model_input, image_latents], dim=2)
-
-                    # predict the noise residual
-                    # noise_pred = unet(
-                    #     latent_model_input,
-                    #     timesteps,
-                    #     encoder_hidden_states=image_embeddings,
-                    #     added_time_ids=added_time_ids,
-                    #     return_dict=False,
-                    # )[0]
 
                     # Get the target for loss depending on the prediction type
                     if scheduler.prediction_type == "epsilon":
@@ -941,9 +891,6 @@ def main(
                         if video_length == 1 and i == 0: break
 
                     loss = losses[0] if len(losses) == 1 else losses[0] + losses[1] 
-                
-                # with accelerator.autocast():
-                #     loss, latents = finetune_unet(batch, train_encoder=train_text_encoder)
                 
                 # Gather the losses across all processes for logging (if we use distributed training).
                 avg_loss = accelerator.gather(loss.repeat(train_batch_size)).mean()
@@ -1015,14 +962,6 @@ def main(
                             out_file = f"./output_samples/{save_filename}.mp4"
                             
                             with torch.no_grad():
-                                # video_frames = pipeline(
-                                #     image,
-                                #     width=validation_data.width,
-                                #     height=validation_data.height,
-                                #     num_frames=validation_data.num_frames,
-                                #     num_inference_steps=validation_data.num_inference_steps,
-                                #     guidance_scale=validation_data.guidance_scale
-                                # ).frames
                                 video_frames = pipeline(image, decode_chunk_size=8).frames[0]
                             export_to_video(video_frames, out_file, fps=7)
 
