@@ -733,10 +733,7 @@ if __name__ == "__main__":
     train_batch_size = 1
     tokenizer = CLIPTokenizer.from_pretrained("damo-vilab/text-to-video-ms-1.7b", subfolder="tokenizer")
 
-    # dataset = VideoFolderDataset(path='/mnt/dolphinfs/ssd_pool/docker/user/hadoop-mtcv/wangqiang121/animating/svd/datasets/animating_val', 
-    #                             fallback_prompt='Scenery, flowing water',
-    #                             tokenizer=tokenizer)
-    dataset = VideoCSVDataset(csv_path='/mnt/dolphinfs/ssd_pool/docker/user/hadoop-mtcv/wangqiang121/animating/svd/Video-BLIP2-Preprocessor-main/train_data/validation_warping.csv',
+    dataset = VideoCSVDataset(csv_path='./validation_warping.csv',
                               tokenizer=tokenizer)
     train_dataloader = torch.utils.data.DataLoader(
         dataset,
