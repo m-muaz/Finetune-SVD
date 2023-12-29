@@ -1,6 +1,6 @@
 # Pretrained diffusers model path.
 
-pretrained_model_path: "/mnt/dolphinfs/ssd_pool/docker/user/hadoop-mtcv/wangqiang121/animating/svd/stable-video-diffusion-image2video" #https://huggingface.co/damo-vilab/text-to-video-ms-1.7b/tree/main
+pretrained_model_path: "./stable-video-diffusion-image2video"
 
 # The folder where your training outputs will be placed.
 output_dir: "./output_models"
